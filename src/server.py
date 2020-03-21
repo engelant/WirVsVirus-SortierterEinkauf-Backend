@@ -12,7 +12,7 @@ def main():
         web.get('/API/locations', rc.getLocations),
         web.get('/API/products', rc.getProducts)
         ])
-    web.run_app(app)
+    web.run_app(app, port=8085)
 
 if __name__ == "__main__":
     main()
