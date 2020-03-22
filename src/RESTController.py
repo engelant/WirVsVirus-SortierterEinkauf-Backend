@@ -141,18 +141,25 @@ class RESTController:
 
     async def getLocationsDetails(self, request):
         try:
-            query = request.query
-            location_ids = json.loads(query["location_ids"])
+            location_ids = await request.json()
         except:
             location_ids = []
         
         result = {}
 
-        if isinstance(location_ids, list):
+        if isinstance(location_ids, list) and len(location_ids) > 0:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
-            for location_id in location_ids:
-                if location_id in self.dummy["locations_details"]:
-                    result[location_id] = self.dummy["locations_details"][location_id]
+            cursor = self.db.cursor()
+            query = '''SELECT id, name, address, ltdtude, lngtude FROM market WHERE id in (%s)''' % ",".join(["%s"]*len(location_ids))
+            cursor.execute(query, tuple(location_ids))
+            market_details = cursor.fetchall()
+            for market_detail in market_details:
+                result[market_detail[0]] = {
+                    "name": market_detail[1],
+                    "address": market_detail[2],
+                    "ltdtude": market_detail[3],
+                    "lngtude": market_detail[4]
+                }
 
         return web.json_response(result)
 

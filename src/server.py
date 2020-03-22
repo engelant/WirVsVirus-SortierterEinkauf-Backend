@@ -15,7 +15,7 @@ def main():
     app = web.Application()
     app.add_routes([
         web.post('/api/search', rc.search),
-        web.get('/api/locations/details',  rc.getLocationsDetails),
+        web.post('/api/locations/details',  rc.getLocationsDetails),
         web.get('/api/locations/pax', rc.getLocationsPax),
         web.get('/api/locations/stats', rc.getLocationsStats),
         web.get('/api/locations/stock', rc.getLocationsStock),
