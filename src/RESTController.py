@@ -167,12 +167,21 @@ class RESTController:
 
     async def _getLocationsPax(self, location_ids):
         # DUMMY: get it from DB, calculate it over time
-        return self.dummy["pax_data"]
+
+        cursor = self.db.cursor()
+        query = "SELECT pax.pax_count, pax.average_presence_time FROM sichereseinkaufen.market_pax as pax WHERE pax.market_id = ? order by timestamp DESC LIMIT 1"
+
+        cursor.execute(query,location_ids)
+        paxdata = cursor.fetchall()
+
+        return paxdata
+        #return self.dummy["pax_data"]
 
     async def getLocationsPax(self, request):
         try:
             query = request.query
             location_ids = json.loads(query["location_ids"])
+
         except:
             location_ids = []
         return web.json_response(await self._getLocationsPax(location_ids))
