@@ -17,7 +17,7 @@ def main():
         web.post('/api/search', rc.search),
         web.post('/api/locations/details',  rc.getLocationsDetails),
         web.post('/api/locations/pax', rc.getLocationsPax),
-        web.get('/api/locations/stats', rc.getLocationsStats),
+        web.post('/api/locations/stats', rc.getLocationsStats),
         web.post('/api/locations/stock', rc.getLocationsStock),
         web.get('/api/products', rc.getProducts)
         ])
