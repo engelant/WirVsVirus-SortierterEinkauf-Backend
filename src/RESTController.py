@@ -267,15 +267,29 @@ class RESTController:
             if data["score"] < 0 or data["score"] > 2:
                 raise ValueError("score outside of ")
             cursor = self.db.cursor()
-            cursor.execute('''INSERT INTO market_stats (market_id, ranking, timestamp) VALUES (%d, %d, NOW())''', tuple([data["location_id"], data["score"]]))
-            print("ok")
+            cursor.execute('''INSERT INTO market_stats (market_id, ranking, timestamp) VALUES (%s, %s, NOW())''', tuple([data["location_id"], data["score"]]))
             self.db.commit()
-            print("perfect")
         except:
-            print("Fail!")
             return web.Response(status=400)
 
         return web.Response()
 
+
     async def addLocationStock(self, request):
+        try:
+            data = await request.json()
+            data = {
+                "location_id": int(data["location_id"]),
+                "product_id": int(data["product_id"]),
+                "score": int(data["score"])
+            }
+            
+            if data["score"] < 0 or data["score"] > 2:
+                raise ValueError("score outside of ")
+            cursor = self.db.cursor()
+            cursor.execute('''INSERT INTO product_market (market_id, products_id, amount, timestamp) VALUES (%s, %s, %s, NOW())''', tuple([data["location_id"], data["product_id"], data["score"]]))
+            self.db.commit()
+        except:
+            return web.Response(status=400)
+
         return web.Response()
