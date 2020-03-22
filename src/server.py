@@ -3,11 +3,15 @@
 
 from aiohttp import web
 from RESTController import RESTController
+import json
 
 
 
 def main():
-    rc = RESTController("foo")
+    with open("settings.json", "r") as f:
+        settings = json.load(f)
+
+    rc = RESTController(settings)
     app = web.Application()
     app.add_routes([
         web.post('/api/search', rc.search),

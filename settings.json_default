@@ -1,0 +1,6 @@
+{
+    "db_url": "localhost:3306",
+    "db_name": "sichereseinkaufen",
+    "db_user": "username",
+    "db_pass": "password"
+}
