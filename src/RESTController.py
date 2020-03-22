@@ -142,7 +142,7 @@ class RESTController:
 
     async def getLocationsDetails(self, request):
         try:
-            location_ids = await request.json()["location_ids"]
+            location_ids = (await request.json())["location_ids"]
         except:
             location_ids = []
 
@@ -190,7 +190,7 @@ class RESTController:
 
     async def getLocationsPax(self, request):
         try:
-            location_ids = await request.json()["location_ids"]
+            location_ids = (await request.json())["location_ids"]
         except:
             location_ids = []
         return web.json_response(await self._getLocationsPax(location_ids))
