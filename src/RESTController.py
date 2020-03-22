@@ -117,7 +117,7 @@ class RESTController:
                 "lat": float(query["lat"]),
                 "lon": float(query["lon"]),
                 "products": list(filter(lambda elm: isinstance(elm, int), query["products"])),
-                "radius": 5000
+                "radius": 500
             }
         except:
             location = None
@@ -142,7 +142,7 @@ class RESTController:
 
     async def getLocationsDetails(self, request):
         try:
-            location_ids = await request.json()
+            location_ids = await request.json()["location_ids"]
         except:
             location_ids = []
 
@@ -190,10 +190,12 @@ class RESTController:
 
     async def getLocationsPax(self, request):
         try:
-            location_ids = await request.json()
+            location_ids = await request.json()["location_ids"]
         except:
             location_ids = []
         return web.json_response(await self._getLocationsPax(location_ids))
+
+
 
     async def _getLocationsStats(self, location_ids):
         result = []
@@ -217,7 +219,7 @@ class RESTController:
 
     async def getLocationsStats(self, request):
         try:
-            location_ids = await request.json()
+            location_ids = await request.json()["location_ids"]
         except:
             location_ids = []
 
@@ -256,6 +258,24 @@ class RESTController:
         return web.json_response(response)
 
     async def addLocationRating(self, request):
+        try:
+            data = await request.json()
+            data = {
+                "location_id": int(data["location_id"]),
+                "score": int(data["score"])
+            }
+            
+            if data["score"] < 0 or data["score"] > 2:
+                raise ValueError("score outside of ")
+            cursor = self.db.cursor()
+            cursor.execute('''INSERT INTO market_stats (market_id, ranking, timestamp) VALUES (%d, %d, NOW())''', tuple([data["location_id"], data["score"]]))
+            print("ok")
+            self.db.commit()
+            print("perfect")
+        except:
+            print("Fail!")
+            return web.Response(status=400)
+
         return web.Response()
 
     async def addLocationStock(self, request):
