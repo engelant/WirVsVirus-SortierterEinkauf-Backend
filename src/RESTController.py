@@ -110,7 +110,7 @@ class RESTController:
     async def search(self, request):
         result = []
         try:
-            query = request.query
+            query = request.json()
             location = {
                 "lat": float(query["lat"]),
                 "lon": float(query["lon"]),

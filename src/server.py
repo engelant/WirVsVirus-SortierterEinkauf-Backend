@@ -10,7 +10,7 @@ def main():
     rc = RESTController("foo")
     app = web.Application()
     app.add_routes([
-        web.get('/api/search', rc.search),
+        web.post('/api/search', rc.search),
         web.get('/api/locations/details',  rc.getLocationsDetails),
         web.get('/api/locations/pax', rc.getLocationsPax),
         web.get('/api/locations/stats', rc.getLocationsStats),
