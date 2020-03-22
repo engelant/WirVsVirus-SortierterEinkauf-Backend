@@ -169,7 +169,7 @@ class RESTController:
         return web.json_response(result)
 
     async def _getLocationsPax(self, location_ids):
-        result = {}
+        result = []
 
         if isinstance(location_ids, list) and len(location_ids) > 0:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
@@ -179,11 +179,11 @@ class RESTController:
             cursor.execute(query,tuple(location_ids))
             pax_lines = cursor.fetchall()
             for pax_line in pax_lines:
-                result[pax_line[0]] = {
+                result.append({
                     "location_id": pax_line[0],
                     "pax_count": pax_line[1],
                     "average_presence_time": pax_line[2]
-                }
+                })
 
             cursor.close()
         return result
@@ -196,6 +196,7 @@ class RESTController:
         return web.json_response(await self._getLocationsPax(location_ids))
 
     async def _getLocationsStats(self, location_ids):
+        result = []
         if isinstance(location_ids, list) and len(location_ids) > 0:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
             cursor = self.db.cursor()
@@ -206,10 +207,10 @@ class RESTController:
             locationsstats = cursor.fetchall()
             stats_lines = cursor.fetchall()
             for stats_line in stats_lines:
-                result[stats_line[0]] = {
+                result.append = ({
                     "location_id": stats_line[0],
                     "ranking": stats_line[1]
-                }
+                })
 
             cursor.close()
         return locationsstats
@@ -253,3 +254,9 @@ class RESTController:
         for product in products:
             response[product[0]] = product[1]
         return web.json_response(response)
+
+    async def addLocationRating(self, request):
+        return web.Response()
+
+    async def addLocationStock(self, request):
+        return web.Response()

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from aiohttp import web
+import aiohttp_cors
 from RESTController import RESTController
 import json
 
@@ -19,9 +20,24 @@ def main():
         web.post('/api/locations/pax', rc.getLocationsPax),
         web.post('/api/locations/stats', rc.getLocationsStats),
         web.post('/api/locations/stock', rc.getLocationsStock),
-        web.get('/api/products', rc.getProducts)
+        web.get('/api/products', rc.getProducts),
+        web.post('/api/location/stats', rc.addLocationRating),
+        web.post('/api/location/stock', rc.addLocationStock)
         ])
-    web.run_app(app, port=8085)
+
+    # Configure default CORS settings.
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+            )
+    })
+
+    # Configure CORS on all routes.
+    for route in list(app.router.routes()):
+        cors.add(route)
+        web.run_app(app, port=8085)
 
 if __name__ == "__main__":
     main()
