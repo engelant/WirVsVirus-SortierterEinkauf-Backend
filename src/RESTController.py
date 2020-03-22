@@ -114,23 +114,23 @@ class RESTController:
             location = {
                 "lat": float(query["lat"]),
                 "lon": float(query["lon"]),
+                "products": list(filter(lambda elm: isinstance(elm, int), query["products"])),
                 "radius": 5000
             }
         except:
             location = None
         
-        if "radius" in query:
-            radius = int(query["radius"])
-            if radius > 0:
-                location["radius"] = radius
-        
         if location is not None:
+            if "radius" in query:
+                radius = int(query["radius"])
+                if radius > 0:
+                    location["radius"] = radius
+
             # Do some queries against the DB
             #'''SELECT * FROM locations WHERE '''
 
             # But for now something static
             result = self.dummy["results"]
-        print(location)
         return web.json_response(result)
 
     async def getLocationsDetails(self, request):
