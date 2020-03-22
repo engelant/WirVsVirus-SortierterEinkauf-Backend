@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from aiohttp import web
 import asyncio
 import json
@@ -105,17 +108,29 @@ class RESTController:
         }
 
     async def search(self, request):
+        result = []
         try:
-            rd = await request.json()
-            # rd now should have user Input, propably a good idea to check everything, especially types
+            query = request.query
+            location = {
+                "lat": float(query["lat"]),
+                "lon": float(query["lon"]),
+                "radius": 5000
+            }
         except:
-            rd = None
+            location = None
+        
+        if "radius" in query:
+            radius = int(query["radius"])
+            if radius > 0:
+                location["radius"] = radius
+        
+        if location is not None:
+            # Do some queries against the DB
+            #'''SELECT * FROM locations WHERE '''
 
-        # Do some queries against the DB
-        #'''SELECT * FROM locations WHERE '''
-
-        # But for now something static
-        result = self.dummy["results"]
+            # But for now something static
+            result = self.dummy["results"]
+        print(location)
         return web.json_response(result)
 
     async def getLocationsDetails(self, request):
@@ -130,7 +145,8 @@ class RESTController:
         if isinstance(location_ids, list):
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
             for location_id in location_ids:
-                result[location_id] = self.dummy["locations_details"][location_id]
+                if location_id in self.dummy["locations_details"]:
+                    result[location_id] = self.dummy["locations_details"][location_id]
 
         return web.json_response(result)
 
@@ -171,8 +187,8 @@ class RESTController:
         return self.dummy["locations_stock"]
 
     async def getLocationsStock(self, request):
-        self._getLocationsStock([],[])
-
+        return web.json_response(self._getLocationsStock([],[]))
+        
 
 
     async def getProducts(self, request):
