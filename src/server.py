@@ -37,7 +37,9 @@ def main():
     # Configure CORS on all routes.
     for route in list(app.router.routes()):
         cors.add(route)
-        web.run_app(app, port=8085)
+    
+    
+    web.run_app(app, port=8085)
 
 if __name__ == "__main__":
     main()
