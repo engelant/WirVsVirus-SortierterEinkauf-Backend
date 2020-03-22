@@ -10,7 +10,8 @@ import pymysql
 class RESTController:
     def __init__(self, settings):
         self.settings = settings
-        self.db = pymysql.connect(self.settings["db_host"], self.settings["db_user"], self.settings["db_pass"], self.settings["db_name"])
+        self.db = pymysql.connect(self.settings["db_host"], self.settings["db_user"], self.settings["db_pass"],
+                                  self.settings["db_name"])
         self.dummy = {
             "products": {
                 0: {
@@ -129,8 +130,8 @@ class RESTController:
                     location["radius"] = radius
 
             # Do some queries against the DB
-            #'''SELECT * FROM locations WHERE '''
-            #DUMMY: unfiltered!
+            # '''SELECT * FROM locations WHERE '''
+            # DUMMY: unfiltered!
             cursor = self.db.cursor()
             cursor.execute('''SELECT id FROM market''')
             location_ids = cursor.fetchall()
@@ -145,13 +146,14 @@ class RESTController:
             location_ids = await request.json()
         except:
             location_ids = []
-        
+
         result = {}
 
         if isinstance(location_ids, list) and len(location_ids) > 0:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
             cursor = self.db.cursor()
-            query = '''SELECT id, name, address, ltdtude, lngtude FROM market WHERE id in (%s)''' % ",".join(["%s"]*len(location_ids))
+            query = '''SELECT id, name, address, ltdtude, lngtude FROM market WHERE id in (%s)''' % ",".join(
+                ["%s"] * len(location_ids))
             cursor.execute(query, tuple(location_ids))
             market_details = cursor.fetchall()
             for market_detail in market_details:
@@ -166,20 +168,18 @@ class RESTController:
 
         return web.json_response(result)
 
-
-
     async def _getLocationsPax(self, location_ids):
         # DUMMY: get it from DB, calculate it over time
 
         cursor = self.db.cursor()
         query = "SELECT pax.pax_count, pax.average_presence_time FROM sichereseinkaufen.market_pax as pax WHERE pax.market_id = ? order by timestamp DESC LIMIT 1"
 
-        cursor.execute(query,location_ids)
+        cursor.execute(query, location_ids)
         paxdata = cursor.fetchall()
 
         cursor.close()
         return paxdata
-        #return self.dummy["pax_data"]
+        # return self.dummy["pax_data"]
 
     async def getLocationsPax(self, request):
         try:
@@ -189,14 +189,21 @@ class RESTController:
         except:
             location_ids = []
         return web.json_response(await self._getLocationsPax(location_ids))
-    
-
-
-
 
     async def _getLocationsStats(self, location_ids):
-        # DUMMY: get it from DB, calculate it over time
-        return self.dummy["locations_stats"]
+        cursor = self.db.cursor()
+
+        placeholder = '?'
+        placeholders = ', '.join(placeholder for unused in location_ids)
+        query = 'SELECT sts.ranking FROM sichereseinkaufen.market_stats as sts WHERE sts.market_id in (%s) order by timestamp DESC LIMIT 1' % placeholders
+
+        cursor.execute(query, location_ids)
+        locationsstats = cursor.fetchall()
+
+        cursor.close()
+        return locationsstats
+
+        # return self.dummy["locations_stats"]
 
     async def getLocationsStats(self, request):
         try:
@@ -206,11 +213,9 @@ class RESTController:
             location_ids = []
         return web.json_response(await self._getLocationsStats(location_ids))
 
-
-
     async def _getLocationsStock(self, location_ids, product_ids):
         print(location_ids, product_ids)
-        #DUMMY: DB data needed here 
+        # DUMMY: DB data needed here
         return self.dummy["locations_stock"]
 
     async def getLocationsStock(self, request):
@@ -224,7 +229,7 @@ class RESTController:
         except:
             print("Except")
             data = None
-        
+
         result = {}
         if data is not None:
             if isinstance(data["product_ids"], list) and isinstance(data["location_ids"], list):
@@ -232,8 +237,6 @@ class RESTController:
                 data["location_ids"] = list(filter(lambda elm: isinstance(elm, int), data["location_ids"]))
                 result = await self._getLocationsStock(data["location_ids"], data["product_ids"])
         return web.json_response(result)
-        
-
 
     async def getProducts(self, request):
         cursor = self.db.cursor()
@@ -243,4 +246,3 @@ class RESTController:
         for product in products:
             response[product[0]] = product[1]
         return web.json_response(response)
-    
