@@ -169,23 +169,28 @@ class RESTController:
 
 
     async def _getLocationsPax(self, location_ids):
-        # DUMMY: get it from DB, calculate it over time
+        result = {}
 
-        cursor = self.db.cursor()
-        query = "SELECT pax.pax_count, pax.average_presence_time FROM sichereseinkaufen.market_pax as pax WHERE pax.market_id = ? order by timestamp DESC LIMIT 1"
+        if isinstance(location_ids, list) and len(location_ids) > 0:
+            location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
+            cursor = self.db.cursor()
+            query = '''SELECT market_id, pax_count, average_presence_time FROM market_pax WHERE market_id IN (%s) ORDER BY timestamp DESC LIMIT 1''' % ",".join(["%s"]*len(location_ids))
 
-        cursor.execute(query,location_ids)
-        paxdata = cursor.fetchall()
+            cursor.execute(query,tuple(location_ids))
+            pax_lines = cursor.fetchall()
+            for pax_line in pax_lines:
+                result[pax_line[0]] = {
+                    "location_id": pax_line[0],
+                    "pax_count": pax_line[1],
+                    "average_presence_time": pax_line[2]
+                }
 
-        cursor.close()
-        return paxdata
-        #return self.dummy["pax_data"]
+            cursor.close()
+        return result
 
     async def getLocationsPax(self, request):
         try:
-            query = request.query
-            location_ids = json.loads(query["location_ids"])
-
+            location_ids = await request.json()
         except:
             location_ids = []
         return web.json_response(await self._getLocationsPax(location_ids))
@@ -209,20 +214,17 @@ class RESTController:
 
 
     async def _getLocationsStock(self, location_ids, product_ids):
-        print(location_ids, product_ids)
         #DUMMY: DB data needed here 
         return self.dummy["locations_stock"]
 
     async def getLocationsStock(self, request):
         try:
             data = await request.json()
-            print(data)
             data = {
                 "product_ids": data["product_ids"],
                 "location_ids": data["location_ids"]
             }
         except:
-            print("Except")
             data = None
         
         result = {}
