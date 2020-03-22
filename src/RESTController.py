@@ -4,11 +4,13 @@
 from aiohttp import web
 import asyncio
 import json
+import pymysql
 
 
 class RESTController:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, settings):
+        self.settings = settings
+        self.db = pymysql.connect(self.settings["db_host"], self.settings["db_user"], self.settings["db_pass"], self.settings["db_name"])
         self.dummy = {
             "products": {
                 0: {
@@ -119,7 +121,7 @@ class RESTController:
             }
         except:
             location = None
-        
+
         if location is not None:
             if "radius" in query:
                 radius = int(query["radius"])
@@ -192,5 +194,11 @@ class RESTController:
 
 
     async def getProducts(self, request):
-        return web.json_response(self.dummy["products"])
+        cursor = self.db.cursor()
+        cursor.execute('''SELECT id, product_name FROM products''')
+        products = cursor.fetchall()
+        response = {}
+        for product in products:
+            response[product[0]] = product[1]
+        return web.json_response(response)
     
