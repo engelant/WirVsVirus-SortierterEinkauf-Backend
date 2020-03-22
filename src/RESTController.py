@@ -203,23 +203,22 @@ class RESTController:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
             cursor = self.db.cursor()
 
-            query = 'SELECT sts.id, sts.ranking FROM sichereseinkaufen.market_stats as sts WHERE sts.market_id in (%s) order by timestamp DESC LIMIT 1'  % ",".join(["%s"]*len(location_ids))
+            query = 'SELECT market_id, ranking FROM market_stats WHERE market_id IN (%s) ORDER BY timestamp DESC LIMIT 1'  % ",".join(["%s"]*len(location_ids))
 
             cursor.execute(query, tuple(location_ids))
-            locationsstats = cursor.fetchall()
             stats_lines = cursor.fetchall()
             for stats_line in stats_lines:
-                result.append = ({
+                result.append({
                     "location_id": stats_line[0],
                     "ranking": stats_line[1]
                 })
 
             cursor.close()
-        return locationsstats
+        return result
 
     async def getLocationsStats(self, request):
         try:
-            location_ids = await request.json()["location_ids"]
+            location_ids = (await request.json())["location_ids"]
         except:
             location_ids = []
 
