@@ -130,9 +130,13 @@ class RESTController:
 
             # Do some queries against the DB
             #'''SELECT * FROM locations WHERE '''
+            #DUMMY: unfiltered!
+            cursor = self.db.cursor()
+            cursor.execute('''SELECT id FROM market''')
+            location_ids = cursor.fetchall()
+            for location_id in location_ids:
+                result.append(location_id[0])
 
-            # But for now something static
-            result = self.dummy["results"]
         return web.json_response(result)
 
     async def getLocationsDetails(self, request):
