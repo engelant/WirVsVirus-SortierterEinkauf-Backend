@@ -18,7 +18,7 @@ def main():
         web.post('/api/locations/details',  rc.getLocationsDetails),
         web.get('/api/locations/pax', rc.getLocationsPax),
         web.get('/api/locations/stats', rc.getLocationsStats),
-        web.get('/api/locations/stock', rc.getLocationsStock),
+        web.post('/api/locations/stock', rc.getLocationsStock),
         web.get('/api/products', rc.getProducts)
         ])
     web.run_app(app, port=8085)

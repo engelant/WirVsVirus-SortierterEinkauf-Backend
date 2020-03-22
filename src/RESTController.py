@@ -209,11 +209,29 @@ class RESTController:
 
 
     async def _getLocationsStock(self, location_ids, product_ids):
+        print(location_ids, product_ids)
         #DUMMY: DB data needed here 
         return self.dummy["locations_stock"]
 
     async def getLocationsStock(self, request):
-        return web.json_response(self._getLocationsStock([],[]))
+        try:
+            data = await request.json()
+            print(data)
+            data = {
+                "product_ids": data["product_ids"],
+                "location_ids": data["location_ids"]
+            }
+        except:
+            print("Except")
+            data = None
+        
+        result = {}
+        if data is not None:
+            if isinstance(data["product_ids"], list) and isinstance(data["location_ids"], list):
+                data["product_ids"] = list(filter(lambda elm: isinstance(elm, int), data["product_ids"]))
+                data["location_ids"] = list(filter(lambda elm: isinstance(elm, int), data["location_ids"]))
+                result = await self._getLocationsStock(data["location_ids"], data["product_ids"])
+        return web.json_response(result)
         
 
 
