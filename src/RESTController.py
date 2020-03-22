@@ -146,7 +146,7 @@ class RESTController:
         except:
             location_ids = []
 
-        result = {}
+        result = []
 
         if isinstance(location_ids, list) and len(location_ids) > 0:
             location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
@@ -156,13 +156,14 @@ class RESTController:
             cursor.execute(query, tuple(location_ids))
             market_details = cursor.fetchall()
             for market_detail in market_details:
-                result[market_detail[0]] = {
+                #array and append
+                result.append({
                     "id": market_detail[0],
                     "name": market_detail[1],
                     "address": market_detail[2],
                     "ltdtude": market_detail[3],
                     "lngtude": market_detail[4]
-                }
+                })
             cursor.close()
 
         return web.json_response(result)
@@ -195,27 +196,32 @@ class RESTController:
         return web.json_response(await self._getLocationsPax(location_ids))
 
     async def _getLocationsStats(self, location_ids):
-        cursor = self.db.cursor()
+        if isinstance(location_ids, list) and len(location_ids) > 0:
+            location_ids = list(filter(lambda elm: isinstance(elm, int), location_ids))
+            cursor = self.db.cursor()
 
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in location_ids)
-        query = 'SELECT sts.ranking FROM sichereseinkaufen.market_stats as sts WHERE sts.market_id in (%s) order by timestamp DESC LIMIT 1' % placeholders
+            query = 'SELECT sts.id, sts.ranking FROM sichereseinkaufen.market_stats as sts WHERE sts.market_id in (%s) order by timestamp DESC LIMIT 1'  % ",".join(["%s"]*len(location_ids))
 
-        cursor.execute(query, location_ids)
-        locationsstats = cursor.fetchall()
+            cursor.execute(query, tuple(location_ids))
+            locationsstats = cursor.fetchall()
+            stats_lines = cursor.fetchall()
+            for stats_line in stats_lines:
+                result[stats_line[0]] = {
+                    "location_id": stats_line[0],
+                    "ranking": stats_line[1]
+                }
 
-        cursor.close()
+            cursor.close()
         return locationsstats
-
-        # return self.dummy["locations_stats"]
 
     async def getLocationsStats(self, request):
         try:
-            query = request.query
-            location_ids = json.loads(query["location_ids"])
+            location_ids = await request.json()
         except:
             location_ids = []
+
         return web.json_response(await self._getLocationsStats(location_ids))
+
 
     async def _getLocationsStock(self, location_ids, product_ids):
         #DUMMY: DB data needed here
