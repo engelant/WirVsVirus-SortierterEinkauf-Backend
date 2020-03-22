@@ -136,6 +136,7 @@ class RESTController:
             location_ids = cursor.fetchall()
             for location_id in location_ids:
                 result.append(location_id[0])
+            cursor.close()
 
         return web.json_response(result)
 
@@ -155,11 +156,13 @@ class RESTController:
             market_details = cursor.fetchall()
             for market_detail in market_details:
                 result[market_detail[0]] = {
+                    "id": market_detail[0],
                     "name": market_detail[1],
                     "address": market_detail[2],
                     "ltdtude": market_detail[3],
                     "lngtude": market_detail[4]
                 }
+            cursor.close()
 
         return web.json_response(result)
 
@@ -174,6 +177,7 @@ class RESTController:
         cursor.execute(query,location_ids)
         paxdata = cursor.fetchall()
 
+        cursor.close()
         return paxdata
         #return self.dummy["pax_data"]
 
